@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "deploy": "scp -r index.js public lexa@robotarm:/home/lexa/app"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-static": "^1.2.6",
+    "express-ws": "^5.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "serialport": "^12.0.0"
+  }
+}
