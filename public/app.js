@@ -2,7 +2,7 @@ const { useState, useEffect } = React;
 
 const ws = new WebSocket(`ws://${window.location.host}/ws`);
 ws.onmessage = (msg) => {
-  console.log(msg);
+  console.log('<', msg.data);
 }
 
 ws.onerror = () => {
