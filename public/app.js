@@ -40,17 +40,17 @@ const App = () => {
       <div >
         <div >
           <Placeholder />
-          <Btn disabled={!connected} onClick={() => send('move', { y: -10 })}>Y -10</Btn>
+          <Btn disabled={!connected} onClick={() => send('move', { x: +10 })}>X +10</Btn>
           <Placeholder />
         </div>
         <div >
-          <Btn disabled={!connected} onClick={() => send('move', { x: -10 })}>X -10</Btn>
+          <Btn disabled={!connected} onClick={() => send('move', { y: -10 })}>Y -10</Btn>
           <Placeholder />
-          <Btn disabled={!connected} onClick={() => send('move', { x: 10 })}>X +10</Btn>
+          <Btn disabled={!connected} onClick={() => send('move', { y: 10 })}>Y +10</Btn>
         </div>
         <div>
           <Placeholder />
-          <Btn disabled={!connected} onClick={() => send('move', { y: -10 })}>Y -10</Btn>
+          <Btn disabled={!connected} onClick={() => send('move', { x: -10 })}>X -10</Btn>
           <Placeholder />
         </div>
       </div>
