@@ -9,13 +9,22 @@ ws.onerror = () => {
   console.log('error');
 }
 
-const send = (type, msg) => {
-  console.log('>', type, msg);
-  ws.send(JSON.stringify({ type, ...msg }));
+const send = (msg) => {
+  console.log('>', msg);
+  ws.send(msg);
 }
 
 const Placeholder = () => <div style={{ display: 'inline-block', width: 100 }} />;
 const Btn = ({ children, ...rest }) => <button style={{ width: 100, height: 100 }} {...rest}>{children}</button>;
+
+const deg2Units = (deg) => ((+deg / 360) * 1000);
+const speed = 5000;
+const moveX = (x) => {
+  send(`G0 X${deg2Units(x)} F${speed}`);
+}
+const moveY = (y) => {
+  send(`G0 Y${deg2Units(y)} F${speed}`);
+}
 
 const App = () => {
   const [connected, setConnected] = useState(ws.readyState === 1);
@@ -40,17 +49,17 @@ const App = () => {
       <div >
         <div >
           <Placeholder />
-          <Btn disabled={!connected} onClick={() => send('move', { x: +10 })}>X +10</Btn>
+          <Btn disabled={!connected} onClick={() => moveX(+10)}>X +10</Btn>
           <Placeholder />
         </div>
         <div >
-          <Btn disabled={!connected} onClick={() => send('move', { y: -10 })}>Y -10</Btn>
+          <Btn disabled={!connected} onClick={() => moveY(-10)}>Y -10</Btn>
           <Placeholder />
-          <Btn disabled={!connected} onClick={() => send('move', { y: 10 })}>Y +10</Btn>
+          <Btn disabled={!connected} onClick={() => moveY(10)}>Y +10</Btn>
         </div>
         <div>
           <Placeholder />
-          <Btn disabled={!connected} onClick={() => send('move', { x: -10 })}>X -10</Btn>
+          <Btn disabled={!connected} onClick={() => moveX(-10)}>X -10</Btn>
           <Placeholder />
         </div>
       </div>

@@ -32,7 +32,7 @@ if (path) {
   fs.createReadStream(`/dev/${path}`, { flags: 'r' }).on('data', (data) => {
     console.log(`> ${data.toString().trim()}`);
     for (const cli of clients) {
-      cli.send(JSON.stringify({ type: "gcode", gcode: data.toString().trim() }));
+      cli.send(data.toString().trim());
     }
   });
 }
@@ -59,8 +59,6 @@ app.use((req, res, next) => {
   next();
 })
 
-const deg2Units = (deg) => ((+deg / 360) * 1000);
-
 app.ws('/ws', (ws, req) => {
   console.log('conn');
   clients.push(ws);
@@ -69,25 +67,7 @@ app.ws('/ws', (ws, req) => {
   });
 
   ws.on('message', (msg) => {
-    const m = JSON.parse(msg);
-    const { type } = m;
-
-    if (type === 'gcode') {
-      const { gcode } = m;
-      write(gcode);
-      return;
-    }
-
-    if (type === 'move') {
-      const { x, y } = m;
-      const speed = 5000;
-
-      if (x) write(`G0 X${deg2Units(x)} F${speed} `);
-      if (y) write(`G0 Y${deg2Units(y)} F${speed} `);
-      return;
-    }
-
-    console.log('unknown type', type);
+    write(msg);
   });
 });
 
