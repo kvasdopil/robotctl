@@ -1,9 +1,8 @@
 const { useState, useEffect } = React;
 
-const ws = new WebSocket(`ws://${window.location.host}/ws`);
-ws.onmessage = (msg) => {
-  console.log('<', msg.data);
-}
+const host = window.location.hostname === 'localhost' ? 'robotarm.local' : window.location.host;
+
+const ws = new WebSocket(`ws://${host}/ws`);
 
 ws.onerror = () => {
   console.log('error');
@@ -20,19 +19,33 @@ const Btn = ({ children, ...rest }) => <button style={{ width: 100, height: 100 
 const deg2Units = (deg) => ((+deg / 360) * 1000);
 const speed = 5000;
 const moveX = (x) => {
-  send("G91");
-  send(`G0 X${deg2Units(x)} F${speed}`);
+  send(`X${x}`);
 }
 const moveY = (y) => {
-  send("G91");
-  send(`G0 Y${deg2Units(y)} F${speed}`);
+  send(`Y${y}`);
 }
 const moveXY = (x, y) => {
-  send("G91");
-  send(`G0 Y${deg2Units(y)} X${deg2Units(x)} F${speed}`);
+  send(`Y${y}`);
+  send(`X${x}`);
 }
 
 const App = () => {
+  const [xPos, setXPos] = useState(0);
+  const [yPos, setYPos] = useState(0);
+
+  useEffect(() => {
+    const onMessage = (msg) => {
+      if (msg.data.includes('moving')) return;
+      for (const chunk of msg.data.split(" ")) {
+        if (chunk.startsWith('X:')) setXPos(+chunk.substr(2));
+        if (chunk.startsWith('Y:')) setYPos(+chunk.substr(2));
+        console.log(chunk);
+      }
+    }
+    ws.addEventListener('message', onMessage);
+    () => ws.removeEventListener('message', onMessage);
+  }, [setXPos, setYPos]);
+
   const [mul, setMul] = useState(10);
   const [connected, setConnected] = useState(ws.readyState === 1);
   useEffect(() => {
@@ -77,6 +90,14 @@ const App = () => {
           <Btn disabled={!connected} onClick={() => moveX(-mul)}>X-</Btn>
           <Btn disabled={!connected} onClick={() => moveXY(-mul, mul)}>X- Y+</Btn>
         </div>
+      </div>
+      <div>X: <strong>{xPos}</strong> Y: <strong>{yPos}</strong></div>
+      <div>
+        <svg width="300" height="300" viewBox="0 0 100 100" style={{ transformOrigin: '50% 50%', transform: `rotate(${xPos}deg)` }}>
+          <circle cx="50" cy="50" r="50" fill="#ccc" />
+          <line x1="45" y1="10" x2="50" y2="1" stroke="#000" />
+          <line x1="55" y1="10" x2="50" y2="1" stroke="#000" />
+        </svg>
       </div>
     </div>
   );

@@ -46,12 +46,12 @@ const write = (data) => {
   return new Promise(resolve => port.write(`${data}; \r\n`, resolve));
 }
 
-async function main() {
-  await new Promise(resolve => setTimeout(resolve, 100));
-  await write('G91');
-}
+// async function main() {
+//   await new Promise(resolve => setTimeout(resolve, 100));
+// //  await write('G91');
+// }
 
-main();
+// main();
 
 
 app.use((req, res, next) => {
