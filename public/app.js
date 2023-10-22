@@ -16,35 +16,34 @@ const send = (msg) => {
 const Placeholder = () => <div style={{ display: 'inline-block', width: 100 }} />;
 const Btn = ({ children, ...rest }) => <button style={{ width: 100, height: 100 }} {...rest}>{children}</button>;
 
+const accel = 3000;
+const speed = 6000;
+
 const moveX = (x) => {
   send("XP40000");
   send("YP40000");
-  send("XS6000");
-  send("XA2000");
-  send("YS6000");
-  send("YA2000");
-  send("XS6000");
-  send("XA2000");
+  send(`XS${speed}`);
+  send(`XA${accel}`);
+  send(`YS${speed}`);
+  send(`YA${accel}`);
   send(`X=${x}`);
 }
 const moveY = (y) => {
   send("XP40000");
   send("YP40000");
-  send("XS6000");
-  send("XA2000");
-  send("YS6000");
-  send("YA2000");
-  send("XS6000");
-  send("XA2000");
+  send(`XS${speed}`);
+  send(`XA${accel}`);
+  send(`YS${speed}`);
+  send(`YA${accel}`);
   send(`Y=${y}`);
 }
 const moveXY = (x, y) => {
   send("XP40000");
   send("YP40000");
-  send("YS6000");
-  send("YA2000");
-  send("XS6000");
-  send("XA2000");
+  send(`XS${speed}`);
+  send(`XA${accel}`);
+  send(`YS${speed}`);
+  send(`YA${accel}`);
   send(`Y=${y}`);
   send(`X=${x}`);
 }
