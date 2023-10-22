@@ -51,47 +51,38 @@ const moveXY = (x, y) => {
 const App = () => {
   const [xPos, setXPos] = useState(0);
   const [yPos, setYPos] = useState(0);
-
-  useEffect(() => {
-    const onMessage = (msg) => {
-      if (msg.data.includes('moving')) return;
-      for (const chunk of msg.data.split(" ")) {
-        if (chunk.startsWith('X=')) setXPos(+chunk.substr(2));
-        if (chunk.startsWith('Y=')) setYPos(+chunk.substr(2));
-        console.log(chunk);
-      }
-    }
-    ws.addEventListener('message', onMessage);
-    () => ws.removeEventListener('message', onMessage);
-  }, [setXPos, setYPos]);
-
-  const [mul, setMul] = useState(10);
   const [connected, setConnected] = useState(ws.readyState === 1);
+
   useEffect(() => {
     const onClose = () => {
       setConnected(false);
     }
     const onOpen = () => {
       setConnected(true);
+
+      send("X?");
+      send("Y?");
+    }
+    const onMessage = (msg) => {
+      for (const chunk of msg.data.split(" ")) {
+        const ch = chunk.trim();
+        if (ch.startsWith('X=')) setXPos(+ch.substr(2));
+        if (ch.startsWith('Y=')) setYPos(+ch.substr(2));
+        console.log(chunk);
+      }
     }
     ws.addEventListener('close', onClose);
     ws.addEventListener('open', onOpen);
+    ws.addEventListener('message', onMessage);
     () => {
       ws.removeEventListener('close', onClose);
       ws.removeEventListener('open', onOpen);
+      ws.removeEventListener('message', onMessage);
     }
-  }, []);
+  }, [setXPos, setYPos, setConnected]);
 
-  const toggleMul = () => {
-    setMul(mul => {
-      if (mul === 10) return 30;
-      if (mul === 30) return 90;
-      return 10;
-    });
-  }
-
-  const [tgtRot, setTgtRot] = useState(0);
-  const [tgtElev, setTgtElev] = useState(0);
+  const [tgtRot, setTgtRot] = useState(null);
+  const [tgtElev, setTgtElev] = useState(null);
 
   const setRot = (e) => {
     const { left, top, width, height } = e.target.getBoundingClientRect();
@@ -157,27 +148,29 @@ const App = () => {
             <line x1="45" y1="10" x2="50" y2="1" stroke="#000" />
             <line x1="55" y1="10" x2="50" y2="1" stroke="#000" />
           </g>
-          <g style={{ transformOrigin: '50% 50%', transform: `rotate(${tgtRot}deg)` }}>
+          {tgtRot !== null && <g style={{ transformOrigin: '50% 50%', transform: `rotate(${tgtRot}deg)` }}>
             <line x1="45" y1="15" x2="50" y2="6" stroke="#0c3" />
             <line x1="55" y1="15" x2="50" y2="6" stroke="#0c3" />
-          </g>
-          <text x={50} y={50} fill="#0c3" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{tgtRot.toFixed(2)}</text>
-          <text x={50} y={60} fill="#000" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{xPos.toFixed(2)}</text>
-          <rect x="0" y="0" width="100" height="100" fill="transparent" stroke="transparent" onClick={onCircleClick} onMouseMove={onCircleMove} />
+          </g>}
+          {connected && tgtRot !== null && <text x={50} y={50} fill="#0c3" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{tgtRot.toFixed(2)}</text>}
+          {connected && <text x={50} y={60} fill="#000" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{xPos.toFixed(2)}</text>}
+          {connected && <rect x="0" y="0" width="100" height="100" fill="transparent" stroke="transparent" onClick={onCircleClick} onMouseMove={onCircleMove} />}
+          {!connected && <text x={50} y={55} fill="#f33" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>NO CONNECTION</text>}
         </svg>
         <svg width="200" height="300" viewBox="0 0 60 100" >
           <rect x="0" y="0" width="200" height="300" fill="#ccc" />
-          <g style={{ transformOrigin: '0% 50%', transform: `translateY(${tgtElev * 0.52}px)` }}>
+          {tgtElev !== null && <g style={{ transformOrigin: '0% 50%', transform: `translateY(${tgtElev * 0.52}px)` }}>
             <line x1="4" y1="50" x2="9" y2="45" stroke="#0c3" />
             <line x1="4" y1="50" x2="9" y2="55" stroke="#0c3" />
-          </g>
+          </g>}
           <g style={{ transformOrigin: '0% 50%', transform: `translateY(${yPos * 0.52}px)` }}>
             <line x1="1" y1="50" x2="6" y2="45" stroke="#000" />
             <line x1="1" y1="50" x2="6" y2="55" stroke="#000" />
           </g>
-          <text x={15} y={50} fill="#0c3" style={{ fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{tgtElev.toFixed(2)}</text>
-          <text x={15} y={60} fill="#000" style={{ fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{yPos.toFixed(2)}</text>
-          <rect x="0" y="0" width="60" height="100" fill="transparent" stroke="transparent" onClick={onRectClick} onMouseMove={onRectMove} />
+          {connected && tgtElev !== null && <text x={15} y={50} fill="#0c3" style={{ fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{tgtElev.toFixed(2)}</text>}
+          {connected && <text x={15} y={60} fill="#000" style={{ fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{yPos.toFixed(2)}</text>}
+          {!connected && <text x={30} y={55} fill="#f33" style={{ width: 30, textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>NO CONN</text>}
+          {connected && <rect x="0" y="0" width="60" height="100" fill="transparent" stroke="transparent" onClick={onRectClick} onMouseMove={onRectMove} />}
         </svg>
       </div>
     </div>
