@@ -92,6 +92,7 @@ const App = () => {
   }
 
   const [tgtRot, setTgtRot] = useState(0);
+  const [tgtElev, setTgtElev] = useState(0);
 
   const setRot = (e) => {
     const { left, top, width, height } = e.target.getBoundingClientRect();
@@ -100,6 +101,13 @@ const App = () => {
     const angle = 90 + Math.atan2(dy, dx) * 180 / Math.PI;
     setTgtRot(angle);
     return angle;
+  }
+
+  const setElev = (e) => {
+    const { left, top, width, height } = e.target.getBoundingClientRect();
+    const dy = (e.clientY - top) / height - 0.5;
+    setTgtElev(190 * dy);
+    return 190 * dy;
   }
 
   const onCircleMove = (e) => {
@@ -113,10 +121,20 @@ const App = () => {
     moveX(a);
   }
 
+  const onRectMove = (e) => {
+    if (e.buttons === 0) return;
+    setElev(e);
+  }
+
+  const onRectClick = (e) => {
+    const a = setElev(e);
+    moveY(a);
+  }
+
   return (
     <div>
       <div>{connected ? 'Connected' : 'Not connected'}</div>
-      <div >
+      {/* <div >
         <div >
           <Btn disabled={!connected} onClick={() => moveXY(+mul, -mul)}>X+ Y-</Btn>
           <Btn disabled={!connected} onClick={() => moveX(+mul)}>X+</Btn>
@@ -132,10 +150,9 @@ const App = () => {
           <Btn disabled={!connected} onClick={() => moveX(-mul)}>X-</Btn>
           <Btn disabled={!connected} onClick={() => moveXY(-mul, mul)}>X- Y+</Btn>
         </div>
-      </div>
-      <div>Y: <strong>{yPos}</strong></div>
-      <div>
-        <svg onClick={onCircleClick} onMouseMove={onCircleMove} width="300" height="300" viewBox="0 0 100 100" >
+      </div> */}
+      <div display="flex">
+        <svg width="300" height="300" viewBox="0 0 100 100" >
           <circle cx="50" cy="50" r="50" fill="#ccc" />
           <g style={{ transformOrigin: '50% 50%', transform: `rotate(${xPos}deg)` }}>
             <line x1="45" y1="10" x2="50" y2="1" stroke="#000" />
@@ -145,8 +162,23 @@ const App = () => {
             <line x1="45" y1="15" x2="50" y2="6" stroke="#0c3" />
             <line x1="55" y1="15" x2="50" y2="6" stroke="#0c3" />
           </g>
-          <text x={50} y={50} fill="#0c3" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10 }}>{tgtRot.toFixed(2)}</text>
-          <text x={50} y={60} fill="#000" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10 }}>{xPos.toFixed(2)}</text>
+          <text x={50} y={50} fill="#0c3" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{tgtRot.toFixed(2)}</text>
+          <text x={50} y={60} fill="#000" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{xPos.toFixed(2)}</text>
+          <rect x="0" y="0" width="100" height="100" fill="transparent" stroke="transparent" onClick={onCircleClick} onMouseMove={onCircleMove} />
+        </svg>
+        <svg width="200" height="300" viewBox="0 0 60 100" >
+          <rect x="0" y="0" width="200" height="300" fill="#ccc" />
+          <g style={{ transformOrigin: '0% 50%', transform: `translateY(${tgtElev * 0.52}px)` }}>
+            <line x1="4" y1="50" x2="9" y2="45" stroke="#0c3" />
+            <line x1="4" y1="50" x2="9" y2="55" stroke="#0c3" />
+          </g>
+          <g style={{ transformOrigin: '0% 50%', transform: `translateY(${yPos * 0.52}px)` }}>
+            <line x1="1" y1="50" x2="6" y2="45" stroke="#000" />
+            <line x1="1" y1="50" x2="6" y2="55" stroke="#000" />
+          </g>
+          <text x={15} y={50} fill="#0c3" style={{ fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{tgtElev.toFixed(2)}</text>
+          <text x={15} y={60} fill="#000" style={{ fontFamily: 'sans-serif', fontSize: 10, userSelect: 'none' }}>{yPos.toFixed(2)}</text>
+          <rect x="0" y="0" width="60" height="100" fill="transparent" stroke="transparent" onClick={onRectClick} onMouseMove={onRectMove} />
         </svg>
       </div>
     </div>
