@@ -16,17 +16,37 @@ const send = (msg) => {
 const Placeholder = () => <div style={{ display: 'inline-block', width: 100 }} />;
 const Btn = ({ children, ...rest }) => <button style={{ width: 100, height: 100 }} {...rest}>{children}</button>;
 
-const deg2Units = (deg) => ((+deg / 360) * 1000);
-const speed = 5000;
 const moveX = (x) => {
-  send(`X${x}`);
+  send("XP40000");
+  send("YP40000");
+  send("XS6000");
+  send("XA2000");
+  send("YS6000");
+  send("YA2000");
+  send("XS6000");
+  send("XA2000");
+  send(`X=${x}`);
 }
 const moveY = (y) => {
-  send(`Y${y}`);
+  send("XP40000");
+  send("YP40000");
+  send("XS6000");
+  send("XA2000");
+  send("YS6000");
+  send("YA2000");
+  send("XS6000");
+  send("XA2000");
+  send(`Y=${y}`);
 }
 const moveXY = (x, y) => {
-  send(`Y${y}`);
-  send(`X${x}`);
+  send("XP40000");
+  send("YP40000");
+  send("YS6000");
+  send("YA2000");
+  send("XS6000");
+  send("XA2000");
+  send(`Y=${y}`);
+  send(`X=${x}`);
 }
 
 const App = () => {
@@ -37,8 +57,8 @@ const App = () => {
     const onMessage = (msg) => {
       if (msg.data.includes('moving')) return;
       for (const chunk of msg.data.split(" ")) {
-        if (chunk.startsWith('X:')) setXPos(+chunk.substr(2));
-        if (chunk.startsWith('Y:')) setYPos(+chunk.substr(2));
+        if (chunk.startsWith('X=')) setXPos(+chunk.substr(2));
+        if (chunk.startsWith('Y=')) setYPos(+chunk.substr(2));
         console.log(chunk);
       }
     }
@@ -71,6 +91,28 @@ const App = () => {
     });
   }
 
+  const [tgtRot, setTgtRot] = useState(0);
+
+  const setRot = (e) => {
+    const { left, top, width, height } = e.target.getBoundingClientRect();
+    const dx = (e.clientX - left) / width - 0.5;
+    const dy = (e.clientY - top) / height - 0.5;
+    const angle = 90 + Math.atan2(dy, dx) * 180 / Math.PI;
+    setTgtRot(angle);
+    return angle;
+  }
+
+  const onCircleMove = (e) => {
+    if (e.buttons === 0) return;
+    setRot(e);
+  }
+
+
+  const onCircleClick = (e) => {
+    const a = setRot(e);
+    moveX(a);
+  }
+
   return (
     <div>
       <div>{connected ? 'Connected' : 'Not connected'}</div>
@@ -91,12 +133,20 @@ const App = () => {
           <Btn disabled={!connected} onClick={() => moveXY(-mul, mul)}>X- Y+</Btn>
         </div>
       </div>
-      <div>X: <strong>{xPos}</strong> Y: <strong>{yPos}</strong></div>
+      <div>Y: <strong>{yPos}</strong></div>
       <div>
-        <svg width="300" height="300" viewBox="0 0 100 100" style={{ transformOrigin: '50% 50%', transform: `rotate(${xPos}deg)` }}>
+        <svg onClick={onCircleClick} onMouseMove={onCircleMove} width="300" height="300" viewBox="0 0 100 100" >
           <circle cx="50" cy="50" r="50" fill="#ccc" />
-          <line x1="45" y1="10" x2="50" y2="1" stroke="#000" />
-          <line x1="55" y1="10" x2="50" y2="1" stroke="#000" />
+          <g style={{ transformOrigin: '50% 50%', transform: `rotate(${xPos}deg)` }}>
+            <line x1="45" y1="10" x2="50" y2="1" stroke="#000" />
+            <line x1="55" y1="10" x2="50" y2="1" stroke="#000" />
+          </g>
+          <g style={{ transformOrigin: '50% 50%', transform: `rotate(${tgtRot}deg)` }}>
+            <line x1="45" y1="15" x2="50" y2="6" stroke="#0c3" />
+            <line x1="55" y1="15" x2="50" y2="6" stroke="#0c3" />
+          </g>
+          <text x={50} y={50} fill="#0c3" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10 }}>{tgtRot.toFixed(2)}</text>
+          <text x={50} y={60} fill="#000" style={{ textAnchor: 'middle', fontFamily: 'sans-serif', fontSize: 10 }}>{xPos.toFixed(2)}</text>
         </svg>
       </div>
     </div>
